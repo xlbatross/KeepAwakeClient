@@ -12,6 +12,7 @@ namespace OpenCVForm
         public enum DecodeType : int
         {
             LoginResult = 0,
+            DrivingResult = 1
         }
 
         public int Type { get; set; }
@@ -78,23 +79,26 @@ namespace OpenCVForm
                 case (int)LoginResultType.First:
                     Ment = "새로운 사용자를 특정했습니다.";
                     break;
+                default:
+                    Ment = "??";
+                    break;
             }
         }
     }
 
-    //internal class DcdImage
-    //{
-    //    public int Rows { get; set; }
+    internal class DcdDrivingResult
+    {
+        public int Rows { get; set; }
 
-    //    public int Cols { get; set; }
+        public int Cols { get; set; }
 
-    //    public Mat img { get; set; }
+        public Mat img { get; set; }
 
-    //    public DcdImage(DecodeTCP dcdtcp)
-    //    {
-    //        Rows = BitConverter.ToInt32(dcdtcp.DataBytesList[0].ToArray(), 0);
-    //        Cols = BitConverter.ToInt32(dcdtcp.DataBytesList[1].ToArray(), 0);
-    //        img = new Mat(Rows, Cols, MatType.CV_8UC3, dcdtcp.DataBytesList[2].ToArray());
-    //    }
-    //}
+        public DcdDrivingResult(DecodeTCP dcdtcp)
+        {
+            Rows = BitConverter.ToInt32(dcdtcp.DataBytesList[0].ToArray(), 0);
+            Cols = BitConverter.ToInt32(dcdtcp.DataBytesList[1].ToArray(), 0);
+            img = new Mat(Rows, Cols, MatType.CV_8UC3, dcdtcp.DataBytesList[2].ToArray());
+        }
+    }
 }

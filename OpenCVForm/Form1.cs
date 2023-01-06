@@ -6,7 +6,7 @@ namespace OpenCVForm
     {
         VideoCapture cap = new VideoCapture(0);
         Client client = new Client();
-        Notify notify = new Notify();
+        Mat img = new Mat();
         bool isDriving = false;
 
         public Form1()
@@ -16,11 +16,6 @@ namespace OpenCVForm
 
         private void Form1_Load(object sender, EventArgs e)
         {
-            // 라벨과 데이터 바인딩
-            BindingSource labelBinding = new BindingSource();
-            labelBinding.DataSource = notify;
-            label1.DataBindings.Add(new Binding("Text", labelBinding, "Text", true, DataSourceUpdateMode.OnPropertyChanged));
-            
             // 클라이언트의 이벤트 핸들러 연결
             client.Connected += client_Connected;
             client.DataResponsed += client_DataResponsed;
@@ -37,7 +32,7 @@ namespace OpenCVForm
             {
                 panel1.Hide();
             }
-            else if (!isConnected) 
+            else
             {
                 MessageBox.Show("서버와 연결하지 못하였습니다.");
                 Application.Exit();
@@ -50,32 +45,52 @@ namespace OpenCVForm
 
             switch (dcd.Type)
             {
-                case (int)Decode.DecodeType.:
+                case (int)Decode.DecodeType.LoginResult:
                     {
-                        DcdImage dcdImage = new DcdImage((DecodeTCP)dcd);
-                        pictureBox1.Image = OpenCvSharp.Extensions.BitmapConverter.ToBitmap(dcdImage.img);
-                    }
-                    break;
+                        DcdLoginResult dcdLoginResult = new DcdLoginResult((DecodeTCP)dcd);
+                        textBox1.AppendText(dcdLoginResult.Ment + "\r\n");
+                        if (dcdLoginResult.Type > 0)
+                        {
+                            isDriving = true;
+                            btn_start.Text = "End";
+                        }    
+                    } break;
+                case (int)Decode.DecodeType.DrivingResult:
+                    {
+                        DcdDrivingResult dcdDrivingResult = new DcdDrivingResult((DecodeTCP)dcd);
+                        pictureBox1.Image = OpenCvSharp.Extensions.BitmapConverter.ToBitmap(dcdDrivingResult.img);
+                    } break;
             }
-
         }
 
         private void timer1_Tick(object sender, EventArgs e)
         {
-            Mat img = new Mat();
             if(cap.Read(img))
             {
-                pictureBox1.Image = OpenCvSharp.Extensions.BitmapConverter.ToBitmap(img);
+                Cv2.Flip(img, img, FlipMode.Y);
                 if (isDriving)
                 {
                     client.SendDrivingImage(img);
                 }
+                else
+                {
+                    pictureBox1.Image = OpenCvSharp.Extensions.BitmapConverter.ToBitmap(img);
+                }
             }
         }
 
-        private void label2_Click(object sender, EventArgs e)
+        private void btn_start_Click(object sender, EventArgs e)
         {
-
+            if (!isDriving)
+            {
+                client.SendLogin(img);
+            }
+            else
+            {
+                textBox1.AppendText("운전을 정지했습니다." + "\r\n");
+                isDriving = false;
+                btn_start.Text = "Start";
+            }
         }
     }
 }

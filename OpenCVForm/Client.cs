@@ -45,14 +45,16 @@ namespace OpenCVForm
             try
             {
                 Socket mainSock2 = (Socket)ar.AsyncState;
-                mainSock2.EndConnect(ar);
-                StateObject obj = new StateObject(mainSock2);
-                Connected?.Invoke(true, EventArgs.Empty);
-                mainSock.BeginReceive(obj.buffer, 0, StateObject.BUFFER_SIZE, 0, DataReceived, obj);
+                if (mainSock2.Connected) 
+                {
+                    mainSock2.EndConnect(ar);
+                    StateObject obj = new StateObject(mainSock2);
+                    mainSock.BeginReceive(obj.buffer, 0, StateObject.BUFFER_SIZE, 0, DataReceived, obj);
+                }
+                Connected?.Invoke(mainSock2.Connected, EventArgs.Empty);
             }
             catch (Exception e)
             {
-                Connected?.Invoke(false, EventArgs.Empty);
                 System.Console.WriteLine(e.Message);
             }
         }
@@ -74,7 +76,7 @@ namespace OpenCVForm
                 System.Console.WriteLine(e.Message);
             }
         }
-        public void SendEncode(Encode ecd)
+        void SendEncode(Encode ecd)
         {
             List<byte> totalBytes = new List<byte>();
             totalBytes.AddRange(ecd.totalSizeByte());
@@ -83,10 +85,16 @@ namespace OpenCVForm
             mainSock.BeginSend(totalBytes.ToArray(), 0, totalBytes.Count, 0, FinishSend, mainSock);
         }
 
-        public void FinishSend(IAsyncResult ar)
+        void FinishSend(IAsyncResult ar)
         {
             Socket mainSock2 = (Socket)ar.AsyncState;
             mainSock2.EndSend(ar);
+        }
+
+        public void SendLogin(Mat img)
+        {
+            EcdLogin ecdImage = new EcdLogin(img);
+            SendEncode(ecdImage);
         }
 
         public void SendDrivingImage(Mat img)
