@@ -8,6 +8,7 @@ namespace OpenCVForm
         Mat img = new Mat();
         Client client = new Client();
         Notify notify = new Notify();
+        bool isDriving = false;
 
         public Form1()
         {
@@ -19,10 +20,40 @@ namespace OpenCVForm
             BindingSource labelBinding = new BindingSource();
             labelBinding.DataSource = notify;
             label1.DataBindings.Add(new Binding("Text", labelBinding, "Text", true, DataSourceUpdateMode.OnPropertyChanged));
-
+            
+            client.Connected += client_Connected;
             client.DataResponsed += client_DataResponsed;
-            //client.Connect();
-            timer1.Start();
+            client.Connect();
+            MessageBox.Show("서버와 연결 중입니다.");
+        }
+
+        private void client_Connected(object sender, EventArgs e) 
+        {
+            bool isConnected = (bool)sender;
+            if (isConnected) 
+            {
+                timer1.Start();
+            }
+            else
+            {
+                MessageBox.Show("서버와 연결을 실패했습니다");
+                Application.Exit();
+            }
+        }
+        private void client_DataResponsed(object sender, EventArgs e)
+        {
+            Decode dcd = (Decode)sender;
+
+            switch (dcd.Type)
+            {
+                case (int)Decode.DecodeType.Image:
+                    {
+                        DcdImage dcdImage = new DcdImage((DecodeTCP)dcd);
+                        pictureBox1.Image = OpenCvSharp.Extensions.BitmapConverter.ToBitmap(dcdImage.img);
+                    }
+                    break;
+            }
+
         }
 
         private void timer1_Tick(object sender, EventArgs e)
@@ -33,20 +64,7 @@ namespace OpenCVForm
             notify.Text = "3";
         }
 
-        private void client_DataResponsed(object sender, EventArgs e)
-        {
-            Decode dcd = (Decode)sender;
-
-            switch(dcd.Type)
-            {
-                case (int)Decode.DecodeType.Image:
-                    {
-                        DcdImage dcdImage = new DcdImage((DecodeTCP)dcd);
-                        pictureBox1.Image = OpenCvSharp.Extensions.BitmapConverter.ToBitmap(dcdImage.img);
-                    } break;
-            }
-            
-        }
+        
 
         
     }

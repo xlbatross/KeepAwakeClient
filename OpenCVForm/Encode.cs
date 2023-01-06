@@ -13,7 +13,8 @@ namespace OpenCVForm
     {
         public enum EncodeType : int
         {
-            Image = 0
+            Login = 0,
+            DrivingImage = 1
         }
 
         public List<List<byte>> DataBytesList { get; set; }
@@ -66,10 +67,9 @@ namespace OpenCVForm
         }
     }
 
-
-    internal class EcdImage : EncodeTCP
+    internal class EcdLogin : EncodeTCP
     {
-        public EcdImage(Mat img) 
+        public EcdLogin(Mat img)
         {
             DataBytesList.Add(BitConverter.GetBytes(img.Rows).ToList());
             DataBytesList.Add(BitConverter.GetBytes(img.Cols).ToList());
@@ -77,7 +77,23 @@ namespace OpenCVForm
             byte[] imaBuff;
             img.GetArray(out imaBuff);
             DataBytesList.Add(imaBuff.ToList());
-            packaging((int)EncodeType.Image);
+            packaging((int)EncodeType.Login);
         }
     }
+
+    internal class EcdDrivingImage : EncodeTCP
+    {
+        public EcdDrivingImage(Mat img) 
+        {
+            DataBytesList.Add(BitConverter.GetBytes(img.Rows).ToList());
+            DataBytesList.Add(BitConverter.GetBytes(img.Cols).ToList());
+            img = img.Reshape(1);
+            byte[] imaBuff;
+            img.GetArray(out imaBuff);
+            DataBytesList.Add(imaBuff.ToList());
+            packaging((int)EncodeType.DrivingImage);
+        }
+    }
+
+    
 }

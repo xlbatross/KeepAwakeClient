@@ -47,10 +47,12 @@ namespace OpenCVForm
                 Socket mainSock2 = (Socket)ar.AsyncState;
                 mainSock2.EndConnect(ar);
                 StateObject obj = new StateObject(mainSock2);
+                Connected?.Invoke(true, EventArgs.Empty);
                 mainSock.BeginReceive(obj.buffer, 0, StateObject.BUFFER_SIZE, 0, DataReceived, obj);
             }
             catch (Exception e)
             {
+                Connected?.Invoke(false, EventArgs.Empty);
                 System.Console.WriteLine(e.Message);
             }
         }
@@ -65,7 +67,6 @@ namespace OpenCVForm
                 obj.workSocket.BeginReceive(obj.buffer, 0, StateObject.BUFFER_SIZE, 0, DataReceived, obj);
 
                 Decode dcd = (Decode)(new DecodeTCP(rawData));
-
                 DataResponsed?.Invoke(dcd, EventArgs.Empty);
             }
             catch (Exception e)
@@ -88,12 +89,13 @@ namespace OpenCVForm
             mainSock2.EndSend(ar);
         }
 
-        public void SendImage(Mat img)
+        public void SendDrivingImage(Mat img)
         {
-            EcdImage ecdImage = new EcdImage(img);
+            EcdDrivingImage ecdImage = new EcdDrivingImage(img);
             SendEncode(ecdImage);
         }
 
+        public event EventHandler? Connected;
         public event EventHandler? DataResponsed;
     }
 }
