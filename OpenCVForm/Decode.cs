@@ -11,7 +11,7 @@ namespace OpenCVForm
     {
         public enum DecodeType : int
         {
-            Image = 0
+            LoginResult = 0,
         }
 
         public int Type { get; set; }
@@ -51,19 +51,50 @@ namespace OpenCVForm
         }
     }
 
-    internal class DcdImage
+    //
+    internal class DcdLoginResult
     {
-        public int Rows { get; set; }
-
-        public int Cols { get; set; }
-
-        public Mat img { get; set; }
-
-        public DcdImage(DecodeTCP dcdtcp)
+        public enum LoginResultType 
         {
-            Rows = BitConverter.ToInt32(dcdtcp.DataBytesList[0].ToArray(), 0);
-            Cols = BitConverter.ToInt32(dcdtcp.DataBytesList[1].ToArray(), 0);
-            img = new Mat(Rows, Cols, MatType.CV_8UC3, dcdtcp.DataBytesList[2].ToArray());
+            Failure = 0,
+            Success = 1,
+            First = 2,
+        }
+        public int Type { get; set; }
+
+        public string Ment { get; init; }
+        
+        public DcdLoginResult(DecodeTCP dcdtcp) 
+        {
+            Type = BitConverter.ToInt32(dcdtcp.DataBytesList[0].ToArray(), 0);
+            switch(Type) 
+            {
+                case (int)LoginResultType.Failure:
+                    Ment = "사용자 구분에 실패하였습니다. 다시 시동을 걸어주세요.";
+                    break;
+                case (int)LoginResultType.Success:
+                    Ment = "사용자를 구분하였습니다.";
+                    break;
+                case (int)LoginResultType.First:
+                    Ment = "새로운 사용자를 특정했습니다.";
+                    break;
+            }
         }
     }
+
+    //internal class DcdImage
+    //{
+    //    public int Rows { get; set; }
+
+    //    public int Cols { get; set; }
+
+    //    public Mat img { get; set; }
+
+    //    public DcdImage(DecodeTCP dcdtcp)
+    //    {
+    //        Rows = BitConverter.ToInt32(dcdtcp.DataBytesList[0].ToArray(), 0);
+    //        Cols = BitConverter.ToInt32(dcdtcp.DataBytesList[1].ToArray(), 0);
+    //        img = new Mat(Rows, Cols, MatType.CV_8UC3, dcdtcp.DataBytesList[2].ToArray());
+    //    }
+    //}
 }

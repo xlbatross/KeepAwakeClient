@@ -16,7 +16,7 @@ namespace OpenCVForm
         {
             mainSock = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
         }
-        public void Connect(string serverIp = "10.10.20.97", int m_port = 2500)
+        public void Connect(string serverIp = "127.0.0.1", int m_port = 2500)
         {
             IPAddress serverAddr = IPAddress.Parse(serverIp);
             IPEndPoint clientEP = new IPEndPoint(serverAddr, m_port);
