@@ -36,7 +36,7 @@ namespace OpenCVForm
             client.DataResponsed += client_DataResponsed;
 
             // 클라이언트와 서버의 연결 시작
-            //client.Connect();
+            client.Connect();
             timer1.Start();
         }
 
@@ -74,6 +74,10 @@ namespace OpenCVForm
                     {
                         DcdDrivingResult dcdDrivingResult = new DcdDrivingResult((DecodeTCP)dcd);
                         pictureBox1.Image = OpenCvSharp.Extensions.BitmapConverter.ToBitmap(dcdDrivingResult.img);
+                        //가히
+                        if (dcdDrivingResult.text != "")
+
+                            textBox1.AppendText(dcdDrivingResult.text + "\r\n");
                     } break;
             }
         }

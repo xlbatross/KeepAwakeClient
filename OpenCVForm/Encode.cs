@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
+using System.Text.Unicode;
 using System.Threading.Tasks;
 using OpenCvSharp;
 
@@ -11,6 +12,7 @@ namespace OpenCVForm
 {
     internal class Encode
     {
+
         public enum EncodeType : int
         {
             Login = 0,
@@ -40,7 +42,7 @@ namespace OpenCVForm
     {
         public EncodeTCP()
         {
-
+            
         }
 
         public void packaging(int typeValue)
@@ -69,6 +71,7 @@ namespace OpenCVForm
 
     internal class EcdLogin : EncodeTCP
     {
+
         public EcdLogin(Mat img)
         {
             DataBytesList.Add(BitConverter.GetBytes(img.Rows).ToList());
@@ -77,6 +80,9 @@ namespace OpenCVForm
             byte[] imaBuff;
             img.GetArray(out imaBuff);
             DataBytesList.Add(imaBuff.ToList());
+            //가히
+            var nowTime = DateTime.Now.ToString("hh:mm:ss");
+            DataBytesList.Add(Encoding.UTF8.GetBytes(nowTime).ToList());
             packaging((int)EncodeType.Login);
         }
     }
@@ -91,6 +97,9 @@ namespace OpenCVForm
             byte[] imaBuff;
             img.GetArray(out imaBuff);
             DataBytesList.Add(imaBuff.ToList());
+            //가히
+            var nowTime = DateTime.Now.ToString("hh:mm:ss");
+            DataBytesList.Add(Encoding.UTF8.GetBytes(nowTime).ToList());
             packaging((int)EncodeType.DrivingImage);
         }
     }

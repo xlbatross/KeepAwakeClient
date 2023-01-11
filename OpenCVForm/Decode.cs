@@ -94,11 +94,17 @@ namespace OpenCVForm
 
         public Mat img { get; set; }
 
+        //가히
+        public string text { get; set; }
+
         public DcdDrivingResult(DecodeTCP dcdtcp)
         {
             Rows = BitConverter.ToInt32(dcdtcp.DataBytesList[0].ToArray(), 0);
             Cols = BitConverter.ToInt32(dcdtcp.DataBytesList[1].ToArray(), 0);
             img = new Mat(Rows, Cols, MatType.CV_8UC3, dcdtcp.DataBytesList[2].ToArray());
+            //가히
+            text = Encoding.UTF8.GetString(dcdtcp.DataBytesList[3].ToArray());
+
         }
     }
 }
