@@ -11,6 +11,9 @@ namespace OpenCVForm
         Mat img = new Mat();
         bool isDriving = false;
         int decibel_count = 0;
+        //가히
+        //int append_count = 0;
+        //int drowsy_count = 0;
 
         public Form1()
         {
@@ -75,9 +78,19 @@ namespace OpenCVForm
                         DcdDrivingResult dcdDrivingResult = new DcdDrivingResult((DecodeTCP)dcd);
                         pictureBox1.Image = OpenCvSharp.Extensions.BitmapConverter.ToBitmap(dcdDrivingResult.img);
                         //가히
+                        
                         if (dcdDrivingResult.text != "")
-
+                        {
                             textBox1.AppendText(dcdDrivingResult.text + "\r\n");
+                            //append_count += 1;
+                        }
+                        
+                        /*if (append_count >= 5)
+                        {
+                            drowsy_count += 1; 
+                            client.SendDrowsyCount(drowsy_count);
+                        }*/
+                        
                     } break;
             }
         }

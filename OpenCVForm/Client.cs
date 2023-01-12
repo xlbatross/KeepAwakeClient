@@ -103,6 +103,13 @@ namespace OpenCVForm
             SendEncode(ecdImage);
         }
 
+        //가히
+        /*public void SendDrowsyCount(int count)
+        {
+            EcdDrowsyCount ecdDrowsyCount = new EcdDrowsyCount(count);
+            SendEncode(ecdDrowsyCount);
+        }*/
+
         public event EventHandler? Connected;
         public event EventHandler? DataResponsed;
     }

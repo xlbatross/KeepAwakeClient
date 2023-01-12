@@ -17,6 +17,7 @@ namespace OpenCVForm
         {
             Login = 0,
             DrivingImage = 1
+            //DrowsyCount =2
         }
 
         public List<List<byte>> DataBytesList { get; set; }
@@ -82,6 +83,7 @@ namespace OpenCVForm
             DataBytesList.Add(imaBuff.ToList());
             //가히
             var nowTime = DateTime.Now.ToString("hh:mm:ss");
+            //yyyy/MM/dd hh:mm:ss
             DataBytesList.Add(Encoding.UTF8.GetBytes(nowTime).ToList());
             packaging((int)EncodeType.Login);
         }
@@ -104,5 +106,14 @@ namespace OpenCVForm
         }
     }
 
-    
+    //가히
+    /*internal class EcdDrowsyCount : EncodeTCP
+    {
+        public EcdDrowsyCount(int count)
+        {
+            DataBytesList.Add(BitConverter.GetBytes(count).ToList());
+            packaging((int)EncodeType.DrowsyCount);
+        }
+    }*/
+
 }
