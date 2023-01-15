@@ -1,5 +1,6 @@
 using Microsoft.VisualBasic.Devices;
 using NAudio.CoreAudioApi;
+using NAudio.Wave;
 using OpenCvSharp;
 
 namespace OpenCVForm
@@ -10,6 +11,14 @@ namespace OpenCVForm
         Client client = new Client();
         Mat img = new Mat();
         bool isDriving = false;
+
+        NAudio.Wave.WaveInEvent waveIn = new NAudio.Wave.WaveInEvent
+        {
+            DeviceNumber = 0, // indicates whick microphone to use
+            WaveFormat = new NAudio.Wave.WaveFormat(rate: 44100, bits: 16, channels: 1),
+            BufferMilliseconds = 20
+        };
+        NAudio.Wave.WaveOutEvent waveOut = new NAudio.Wave.WaveOutEvent();
         int decibel_count = 0;
         //가히
         //int append_count = 0;
@@ -18,22 +27,21 @@ namespace OpenCVForm
         public Form1()
         {
             InitializeComponent();
-
-
-            var waveIn = new NAudio.Wave.WaveInEvent
-            {
-                DeviceNumber = 0, // indicates whick microphone to use
-                WaveFormat = new NAudio.Wave.WaveFormat(rate: 44100, bits: 16, channels: 1),
-                BufferMilliseconds = 20
-            };
-
-            waveIn.DataAvailable += WaveIn_DataAvailable;
-            waveIn.StartRecording();
-
         }
 
         private void Form1_Load(object sender, EventArgs e)
         {
+            decibel_count = 0;
+            waveIn.DataAvailable += WaveIn_DataAvailable;
+            waveIn.StartRecording();
+
+            var reader = new AudioFileReader("./Y_Stan_remix.mp3");
+            waveOut.Init(reader);
+            waveOut.Play();
+
+            DateTime a = DateTime.Now + TimeSpan.Parse("00:10:00");
+            MessageBox.Show((DateTime.Now > a) ? "True" : "False");
+
             // 클라이언트의 이벤트 핸들러 연결
             client.Connected += client_Connected;
             client.DataResponsed += client_DataResponsed;
@@ -41,6 +49,25 @@ namespace OpenCVForm
             // 클라이언트와 서버의 연결 시작
             client.Connect();
             timer1.Start();
+        }
+
+        private void WaveIn_DataAvailable(object sender, NAudio.Wave.WaveInEventArgs e)
+        {
+            // copy buffer into an array of integers
+            Int16[] values = new Int16[e.Buffer.Length / 2];
+            Buffer.BlockCopy(e.Buffer, 0, values, 0, e.Buffer.Length);
+
+            // determine the highest value as a fraction of the maximum possible value
+            float fraction = (float)values.Max() / 32768;
+
+            int decibel = (int)(fraction * 100);
+
+            // print a level meter using the console
+            progressBar1.Value = decibel;
+            if (decibel == 99)
+                decibel_count += 1;
+            label1.Text = decibel_count.ToString();
+
         }
 
         private void client_Connected(object sender, EventArgs e) 
@@ -124,29 +151,7 @@ namespace OpenCVForm
                 btn_start.Text = "Start";
             }
         }
-        private void label1_click(object sender, EventArgs e)
-        {
 
-        }
-
-
-        private void WaveIn_DataAvailable(object sender, NAudio.Wave.WaveInEventArgs e)
-        {
-            // copy buffer into an array of integers
-            Int16[] values = new Int16[e.Buffer.Length / 2];
-            Buffer.BlockCopy(e.Buffer, 0, values, 0, e.Buffer.Length);
-
-            // determine the highest value as a fraction of the maximum possible value
-            float fraction = (float)values.Max() / 32768;
-
-            int decibel = (int)(fraction * 100);
-
-            // print a level meter using the console
-            progressBar1.Value = decibel;
-            if (decibel == 99)
-                decibel_count += 1;
-            label1.Text = decibel_count.ToString();
-          
-        }
+        
     }
 }
