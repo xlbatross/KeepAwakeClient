@@ -114,6 +114,7 @@ namespace OpenCVForm
                 if (isSolutioning)
                 {
                     isSolutioning = false;
+                    decibel_count = 0;
                     progressBar1.Value = 0;
                     label1.Text = "솔루션 대기중...";
                     waveIn.StopRecording();
@@ -145,6 +146,7 @@ namespace OpenCVForm
                 textBox1.AppendText("솔루션이 종료됩니다." + "\r\n");
 
                 isSolutioning = false;
+                decibel_count = 0;
                 progressBar1.Value = 0;
                 label1.Text = "솔루션 대기중...";
                 waveIn.StopRecording();
