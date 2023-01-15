@@ -38,6 +38,7 @@
             this.panel1 = new System.Windows.Forms.Panel();
             this.lb_serverMsg = new System.Windows.Forms.Label();
             this.timer1 = new System.Windows.Forms.Timer(this.components);
+            this.timer2 = new System.Windows.Forms.Timer(this.components);
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.panel2.SuspendLayout();
             this.panel1.SuspendLayout();
@@ -78,9 +79,9 @@
             this.label1.AutoSize = true;
             this.label1.Location = new System.Drawing.Point(700, 426);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(39, 15);
+            this.label1.Size = new System.Drawing.Size(89, 15);
             this.label1.TabIndex = 6;
-            this.label1.Text = "label1";
+            this.label1.Text = "솔루션 대기중..";
             // 
             // progressBar1
             // 
@@ -120,6 +121,11 @@
             this.timer1.Interval = 33;
             this.timer1.Tick += new System.EventHandler(this.timer1_Tick);
             // 
+            // timer2
+            // 
+            this.timer2.Interval = 1000;
+            this.timer2.Tick += new System.EventHandler(this.timer2_Tick);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
@@ -148,5 +154,6 @@
         private TextBox textBox1;
         private ProgressBar progressBar1;
         private Label label1;
+        private System.Windows.Forms.Timer timer2;
     }
 }

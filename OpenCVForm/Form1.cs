@@ -7,10 +7,18 @@ namespace OpenCVForm
 {
     public partial class Form1 : Form
     {
-        VideoCapture cap = new VideoCapture(0);
         Client client = new Client();
+
+        VideoCapture cap = new VideoCapture(0);
         Mat img = new Mat();
+
         bool isDriving = false;
+
+        bool isSolutioning = false;
+
+        DateTime startTime = DateTime.Now;
+
+        List<string> drowsyAvg = new List<string>();
 
         NAudio.Wave.WaveInEvent waveIn = new NAudio.Wave.WaveInEvent
         {
@@ -18,8 +26,11 @@ namespace OpenCVForm
             WaveFormat = new NAudio.Wave.WaveFormat(rate: 44100, bits: 16, channels: 1),
             BufferMilliseconds = 20
         };
+
         NAudio.Wave.WaveOutEvent waveOut = new NAudio.Wave.WaveOutEvent();
+
         int decibel_count = 0;
+
         //가히
         //int append_count = 0;
         //int drowsy_count = 0;
@@ -31,16 +42,7 @@ namespace OpenCVForm
 
         private void Form1_Load(object sender, EventArgs e)
         {
-            decibel_count = 0;
             waveIn.DataAvailable += WaveIn_DataAvailable;
-            waveIn.StartRecording();
-
-            var reader = new AudioFileReader("./Y_Stan_remix.mp3");
-            waveOut.Init(reader);
-            waveOut.Play();
-
-            DateTime a = DateTime.Now + TimeSpan.Parse("00:10:00");
-            MessageBox.Show((DateTime.Now > a) ? "True" : "False");
 
             // 클라이언트의 이벤트 핸들러 연결
             client.Connected += client_Connected;
@@ -48,26 +50,9 @@ namespace OpenCVForm
 
             // 클라이언트와 서버의 연결 시작
             client.Connect();
+
             timer1.Start();
-        }
-
-        private void WaveIn_DataAvailable(object sender, NAudio.Wave.WaveInEventArgs e)
-        {
-            // copy buffer into an array of integers
-            Int16[] values = new Int16[e.Buffer.Length / 2];
-            Buffer.BlockCopy(e.Buffer, 0, values, 0, e.Buffer.Length);
-
-            // determine the highest value as a fraction of the maximum possible value
-            float fraction = (float)values.Max() / 32768;
-
-            int decibel = (int)(fraction * 100);
-
-            // print a level meter using the console
-            progressBar1.Value = decibel;
-            if (decibel == 99)
-                decibel_count += 1;
-            label1.Text = decibel_count.ToString();
-
+            timer2.Start();
         }
 
         private void client_Connected(object sender, EventArgs e) 
@@ -97,11 +82,9 @@ namespace OpenCVForm
                         if (dcdLoginResult.Type > 0)
                         {
                             isDriving = true;
+                            drowsyAvg = dcdLoginResult.DrowsyAvg;
+                            startTime = DateTime.Now;
                             btn_start.Text = "End";
-                            foreach (string time in dcdLoginResult.DrowsyAvg)
-                            {
-                                textBox1.AppendText(time + "\r\n");
-                            }
                         }    
                     } break;
                 case (int)Decode.DecodeType.DrivingResult:
@@ -113,16 +96,64 @@ namespace OpenCVForm
                         if (dcdDrivingResult.text != "")
                         {
                             textBox1.AppendText(dcdDrivingResult.text + "\r\n");
-                            //append_count += 1;
                         }
-                        
-                        /*if (append_count >= 5)
-                        {
-                            drowsy_count += 1; 
-                            client.SendDrowsyCount(drowsy_count);
-                        }*/
-                        
                     } break;
+            }
+        }
+
+        private void btn_start_Click(object sender, EventArgs e)
+        {
+            if (!isDriving)
+            {
+                client.SendLogin(img);
+            }
+            else
+            {
+                textBox1.AppendText("운전을 정지했습니다." + "\r\n");
+                isDriving = false;
+                if (isSolutioning)
+                {
+                    isSolutioning = false;
+                    progressBar1.Value = 0;
+                    label1.Text = "솔루션 대기중...";
+                    waveIn.StopRecording();
+                    waveOut.Stop();
+                }
+                btn_start.Text = "Start";
+            }
+        }
+
+        private void WaveIn_DataAvailable(object sender, NAudio.Wave.WaveInEventArgs e)
+        {
+            // copy buffer into an array of integers
+            Int16[] values = new Int16[e.Buffer.Length / 2];
+            Buffer.BlockCopy(e.Buffer, 0, values, 0, e.Buffer.Length);
+
+            // determine the highest value as a fraction of the maximum possible value
+            float fraction = (float)values.Max() / 32768;
+
+            int decibel = (int)(fraction * 100);
+
+            // print a level meter using the console
+            progressBar1.Value = decibel;
+            if (decibel == 99)
+                decibel_count += 1;
+            label1.Text = decibel_count.ToString();
+
+            if (decibel_count >= 100)
+            {
+                textBox1.AppendText("솔루션이 종료됩니다." + "\r\n");
+
+                isSolutioning = false;
+                progressBar1.Value = 0;
+                label1.Text = "솔루션 대기중...";
+                waveIn.StopRecording();
+                waveOut.Stop();
+
+                if (isDriving) 
+                {
+                    startTime = DateTime.Now;
+                }
             }
         }
 
@@ -142,20 +173,29 @@ namespace OpenCVForm
             }
         }
 
-        private void btn_start_Click(object sender, EventArgs e)
+        private void timer2_Tick(object sender, EventArgs e)
         {
-            if (!isDriving)
+            if (!isDriving || isSolutioning)
             {
-                client.SendLogin(img);
+                return;
             }
-            else
+
+            string timeInterval = (drowsyAvg.Count > 0) ? drowsyAvg[0] : "00:30:00";
+
+            if (DateTime.Now >= startTime + TimeSpan.Parse(timeInterval))
             {
-                textBox1.AppendText("운전을 정지했습니다." + "\r\n");
-                isDriving = false;
-                btn_start.Text = "Start";
+                textBox1.AppendText("솔루션을 시작합니다." + "\r\n");
+
+                if (drowsyAvg.Count > 0)
+                    drowsyAvg.RemoveAt(0);
+
+                isSolutioning = true;
+                waveIn.StartRecording();
+
+                var reader = new AudioFileReader("./Y_Stan_remix.mp3");
+                waveOut.Init(reader);
+                waveOut.Play();
             }
         }
-
-        
     }
 }
