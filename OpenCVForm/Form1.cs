@@ -98,6 +98,10 @@ namespace OpenCVForm
                         {
                             isDriving = true;
                             btn_start.Text = "End";
+                            foreach (string time in dcdLoginResult.DrowsyAvg)
+                            {
+                                textBox1.AppendText(time + "\r\n");
+                            }
                         }    
                     } break;
                 case (int)Decode.DecodeType.DrivingResult:

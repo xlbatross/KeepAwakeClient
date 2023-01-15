@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using OpenCvSharp;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace OpenCVForm
 {
@@ -64,6 +65,8 @@ namespace OpenCVForm
         public int Type { get; set; }
 
         public string Ment { get; init; }
+
+        public List<string> DrowsyAvg { get; set; }
         
         public DcdLoginResult(DecodeTCP dcdtcp) 
         {
@@ -82,6 +85,11 @@ namespace OpenCVForm
                 default:
                     Ment = "??";
                     break;
+            }
+            DrowsyAvg= new List<string>();
+            for (int i = 1; i < dcdtcp.DataBytesList.Count; i++) 
+            {
+                DrowsyAvg.Add(Encoding.UTF8.GetString(dcdtcp.DataBytesList[i].ToArray()));
             }
         }
     }
