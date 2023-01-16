@@ -114,11 +114,7 @@ namespace OpenCVForm
                 if (isSolutioning)
                 {
                     isSolutioning = false;
-                    decibel_count = 0;
-                    progressBar1.Value = 0;
-                    label1.Text = "솔루션 대기중...";
-                    waveIn.StopRecording();
-                    waveOut.Stop();
+                    SetSolution();
                 }
                 btn_start.Text = "Start";
             }
@@ -146,16 +142,7 @@ namespace OpenCVForm
                 textBox1.AppendText("솔루션이 종료됩니다." + "\r\n");
 
                 isSolutioning = false;
-                decibel_count = 0;
-                progressBar1.Value = 0;
-                label1.Text = "솔루션 대기중...";
-                waveIn.StopRecording();
-                waveOut.Stop();
-
-                if (isDriving) 
-                {
-                    startTime = DateTime.Now;
-                }
+                SetSolution();
             }
         }
 
@@ -192,11 +179,32 @@ namespace OpenCVForm
                     drowsyAvg.RemoveAt(0);
 
                 isSolutioning = true;
+                SetSolution();
+            }
+        }
+
+        private void SetSolution()
+        {
+            if (isSolutioning)
+            {
                 waveIn.StartRecording();
 
                 var reader = new AudioFileReader("./Y_Stan_remix.mp3");
                 waveOut.Init(reader);
                 waveOut.Play();
+            }
+            else
+            {
+                waveIn.StopRecording();
+                waveOut.Stop();
+                decibel_count = 0;
+                progressBar1.Value = 0;
+                label1.Text = "솔루션 대기중...";
+
+                if (isDriving)
+                {
+                    startTime = DateTime.Now;
+                }
             }
         }
     }
